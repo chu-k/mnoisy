@@ -9,6 +9,7 @@ jobs:
   ruff-lint:
     runs-on: ubuntu-20.04
     steps:
+      - uses: actions/checkout@v3
       - uses: chartboost/ruff-action@v1
         with:
           src: "./src"
