@@ -16,6 +16,9 @@ dependencies = [
   "jsonschema",
   "pyyaml",
 ]
+[project.optional-dependencies]
+test = ["pytest", "pytest-cov"]
+dev = ["jupyter", "black", "isort", "ruff", "pre-commit"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
@@ -26,9 +29,6 @@ mnoisy = ["schema/*.yml"]
 mnoisy-gen = "mnoisy:commands.generate"
 mnoisy-rebuild = "mnoisy:commands.rebuild"
 
-[project.optional-dependencies]
-test = ["pytest", "pytest-cov"]
-dev = ["jupyter", "black", "isort", "ruff", "pre-commit"]
 
 [tool.black]
 line-length = 120
