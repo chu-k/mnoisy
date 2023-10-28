@@ -1,0 +1,51 @@
+title: animation_data
+description: Schema for generated noise animation data
+type: object
+properties:
+  metadata_fname:
+    type: string
+    description: Filename of the metadata
+  animation_fname:
+    type: string
+    description: Filename of the animation data
+  created_at:
+    type: string
+    description: Timestamp of the creation of the animation data
+  random_seed:
+    type: integer
+    description: Top-level random seed used to generate the animation data
+  num_frames:
+    type: integer
+    description: Number of frames in the animation
+  image_size_in_pixels:
+    type: integer
+    description: Size of the square image in pixels
+  frames:
+    type: array
+    description: List of frames in the animation (i.e. a NoiseGrid)
+    items:
+      type: object
+      properties:
+        timestamp_absolute:
+          type: string
+          description: Timestamp of the animation frame
+        generation_timedelta:
+          type: string
+          description: Timedelta of the animation frame relative to the first frame
+        frame_number:
+          type: integer
+          description: Frame number
+        random_seed:
+          type: integer
+          description: Random seed used to generate the frame
+  noise_generator:
+    type: object
+    description: NoiseGenerator used to generate the frame
+    oneOf:
+      - MSequence:
+          type: object
+          description: MSequence generator
+          properties:
+            sequence_length:
+              type: integer
+              description: Length of the MSequence

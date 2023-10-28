@@ -5,3 +5,4 @@
 # Python packaging
 *.egg-info
 *__pycache__
+build/

@@ -1,5 +1,6 @@
-import numpy as np
 from typing import Protocol
+
+import numpy as np
 
 
 class NoiseGenerator(Protocol):
@@ -7,6 +8,10 @@ class NoiseGenerator(Protocol):
 
     def generate_noise_1d(self, seed: int) -> np.ndarray:
         """Return 1D noise signal."""
+        ...
+
+    def build_metadata(self) -> dict:
+        """Return metadata about the noise generator."""
         ...
 
     @property

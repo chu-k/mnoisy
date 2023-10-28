@@ -10,34 +10,30 @@ readme = "README.md"
 requires-python = ">=3.8"
 authors = [{ name = "Kevin Chu", email = "kvnchv@gmail.com" }]
 dependencies = [
-    # add requirements here
-    "scipy",
-    "matplotlib",
+  # add requirements here
+  "scipy",
+  "matplotlib",
+  "jsonschema",
+  "pyyaml",
 ]
 
 [project.scripts]
 mnoisy-gen = "mnoisy:__main__.main"
 
 [project.optional-dependencies]
-test = ["pytest"]
-dev = ["black", "isort", "ruff"]
+test = ["pytest", "pytest-cov"]
+dev = ["jupyter", "black", "isort", "ruff", "pre-commit"]
 
 [tool.black]
 line-length = 120
-target-version = ['py38']
-# 'extend-exclude' excludes files or directories in addition to the defaults
-extend-exclude = '''
-(
-    examples\/.*\/.*\.py
-  | other\/.*\/.*\.(py|ipynb)
-)
-'''
+target-version = ['py310']
+
 
 [tool.ruff]
 # Exclude a variety of commonly ignored directories.
 extend-exclude = ["examples/**/*.py", "other/**/*.py"]
 line-length = 120
-target-version = "py38"
+target-version = "py310"
 
 [tool.ruff.per-file-ignores]
 "__init__.py" = ["F401"]

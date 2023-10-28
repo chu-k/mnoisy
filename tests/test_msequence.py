@@ -1,6 +1,6 @@
 import numpy as np
-
 import pytest
+
 from mnoisy.noise.msequence import MSequence
 
 
@@ -15,7 +15,7 @@ def test_constructor(mseq_instance):
 
 def test_invalid_length_raises_error():
     with pytest.raises(NotImplementedError):
-        MSequence(sequence_length=12)
+        MSequence(sequence_length=13)
 
 
 @pytest.mark.parametrize(

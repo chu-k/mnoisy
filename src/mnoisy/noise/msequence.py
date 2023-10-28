@@ -1,8 +1,9 @@
 from typing import Callable
 
-from mnoisy.noise.base import NoiseGenerator
 import numpy as np
 from scipy.stats import randint
+
+from mnoisy.noise.base import NoiseGenerator
 
 
 class MSequence(NoiseGenerator):
@@ -14,10 +15,7 @@ class MSequence(NoiseGenerator):
 
         Args:
             sequence_length (int): Length of the m-sequence to generate.
-            update_fn (Callable[[np.ndarray], int]): Update function for the shift register.
-            seed (Optional[int], optional): Seed value for the initial register. Defaults to None.
         """
-        # generate a random initial register
         self.sequence_length = sequence_length
         self.update_fn: Callable[[np.ndarray], int] = UpdateFuncRegistry().get(sequence_length)
         self.repeat_cutoff = sequence_length**2 - 1
@@ -38,17 +36,19 @@ class MSequence(NoiseGenerator):
         return self.signal
 
     def shift_update(self, register: np.ndarray) -> np.ndarray:
-        """Shift register and update the last element.
-
-        Can roll forwards or backwards; if forwards, update the first element.
-        """
+        """Shift register and update the last element."""
         shift = np.roll(register, -1)
         shift[-1] = int(self.update_fn(register)) % 2
         return shift
 
+    def build_metadata(self) -> dict:
+        return {
+            "sequence_length": self.sequence_length,
+        }
+
 
 class UpdateFuncRegistry:
-    """Registry for update functions, implemented up to size 9."""
+    """Registry for update functions, implemented up to size 12."""
 
     def __init__(self) -> None:
         self._registry = {}
@@ -58,7 +58,7 @@ class UpdateFuncRegistry:
         See http://www.kempacoustics.com/thesis/node83.html
         Can implement for other sizes, see table 7.2 in reference
 
-        NOTE: There's probably a cleaner way to map size -> update function.
+        NOTE: There may a cleaner way to map size -> update function.
         """
         if size == 1:
             return lambda x: x[0]
@@ -70,5 +70,11 @@ class UpdateFuncRegistry:
             return lambda x: x[0] + x[1] + x[5] + x[6]
         elif size == 9:
             return lambda x: x[0] + x[4]
+        elif size == 10:
+            return lambda x: x[0] + x[3]
+        elif size == 11:
+            return lambda x: x[0] + x[2]
+        elif size == 12:
+            return lambda x: x[0] + x[3] + x[4] + x[7]
         else:
             raise NotImplementedError
