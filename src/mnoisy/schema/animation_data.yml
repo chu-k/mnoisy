@@ -46,6 +46,9 @@ properties:
           type: object
           description: MSequence generator
           properties:
+            generator_type:
+              type: string
+              description: Type of noise generator
             sequence_length:
               type: integer
               description: Length of the MSequence

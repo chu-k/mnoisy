@@ -7,6 +7,8 @@ from mnoisy.noise.base import NoiseGenerator
 
 
 class MSequence(NoiseGenerator):
+    type: str = "msequence"
+
     def __init__(
         self,
         sequence_length: int,
@@ -23,11 +25,19 @@ class MSequence(NoiseGenerator):
         self.grid = np.zeros((self.repeat_cutoff, sequence_length))
 
     @property
+    def generator_type(self) -> str:
+        return self.type
+
+    @property
     def limit(self) -> int:
         return self.repeat_cutoff
 
     def generate_noise_1d(self, seed: int) -> np.ndarray:
-        """Generate 1D m-sequence noise."""
+        """Generate 1D m-sequence noise.
+
+        Args:
+            seed (int): Random seed for reproducibility.
+        """
         register = randint(0, 2).rvs(size=self.sequence_length, random_state=seed)
         for i in range(self.repeat_cutoff):
             self.grid[i] = register
@@ -36,7 +46,11 @@ class MSequence(NoiseGenerator):
         return self.signal
 
     def shift_update(self, register: np.ndarray) -> np.ndarray:
-        """Shift register and update the last element."""
+        """Shift register and update the last element.
+
+        Args:
+            register (np.ndarray): Current state of the shift register.
+        """
         shift = np.roll(register, -1)
         shift[-1] = int(self.update_fn(register)) % 2
         return shift
@@ -44,6 +58,7 @@ class MSequence(NoiseGenerator):
     def build_metadata(self) -> dict:
         return {
             "sequence_length": self.sequence_length,
+            "generator_type": self.generator_type,
         }
 
 

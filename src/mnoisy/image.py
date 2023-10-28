@@ -55,6 +55,7 @@ class NoiseAnimator:
         self,
         image_artist: NoiseGridGenerator,
         display_time_per_frame_in_seconds: float,
+        debug: bool = False,
     ):
         """Generates a sequence of NoiseGrid
 
@@ -65,6 +66,7 @@ class NoiseAnimator:
         self.image_artist = image_artist
         self.display_time_per_frame_in_seconds = display_time_per_frame_in_seconds
         self.img_size = image_artist.image_size_in_pixels
+        self._debug = debug
 
     def execute(self, num_frames: int, seed: int, output_filename: str = "noise.gif"):
         """Execute the main logic of the animator.
@@ -75,6 +77,9 @@ class NoiseAnimator:
             output_filename (str): Output filename for the animation.
         """
         frames, metadata = self.generate_frames(num_frames, seed, output_filename)
+        if self._debug:
+            frames.dump("debug-frames.npy")
+
         self.__write_metadata(metadata)
         self.__animate_frames(frames, metadata.get("animation_fname", output_filename))
 

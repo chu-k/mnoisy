@@ -10,12 +10,24 @@ def mseq_instance():
 
 
 def test_constructor(mseq_instance):
-    assert mseq_instance.repeat_cutoff == 4**2 - 1
+    assert mseq_instance.repeat_cutoff == mseq_instance.limit
 
 
 def test_invalid_length_raises_error():
     with pytest.raises(NotImplementedError):
         MSequence(sequence_length=13)
+
+
+def test_metadata(mseq_instance):
+    assert mseq_instance.build_metadata() == {
+        "sequence_length": 4,
+        "generator_type": "msequence",
+    }
+
+
+@pytest.mark.parametrize("mseq_length", list(range(1, 13)))
+def test_update_func_registry(mseq_length):
+    assert MSequence(sequence_length=mseq_length).update_fn is not None
 
 
 @pytest.mark.parametrize(

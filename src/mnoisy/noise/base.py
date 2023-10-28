@@ -18,3 +18,8 @@ class NoiseGenerator(Protocol):
     def limit(self) -> int:
         """Return the maximum length accesible to the generator."""
         ...
+
+    @property
+    def generator_type(self) -> str:
+        """Return the type of the generator."""
+        ...

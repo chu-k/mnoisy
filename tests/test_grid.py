@@ -3,7 +3,7 @@ from unittest import mock
 import numpy as np
 import pytest
 
-from mnoisy.image import NoiseGridGenerator
+from mnoisy.image import NoiseGeneratorLimitError, NoiseGridGenerator
 from mnoisy.noise import MSequence
 
 
@@ -17,6 +17,17 @@ def noise_grid_generator():
             generate_noise_1d=mock.Mock(return_value=np.zeros(7**2 - 1)),  # return value for generate_noise_1d method
         ),
     )
+
+
+def test_invalid_image_size_raises_error():
+    with pytest.raises(NoiseGeneratorLimitError):
+        NoiseGridGenerator(
+            image_size_in_pixels=16,
+            noise_generator=mock.Mock(
+                spec=MSequence(sequence_length=4),
+                limit=4**2 - 1,  # return value for limit property
+            ),
+        )
 
 
 def test_constructor(noise_grid_generator):
