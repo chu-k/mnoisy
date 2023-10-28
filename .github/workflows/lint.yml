@@ -6,17 +6,19 @@ on:
     branches: [ main ]
 
 jobs:
-  ruff:
-    - uses: chartboost/ruff-action@v1
-      with:
-        src: "./src"
-        version: 0.0.259
+  ruff-lint:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: chartboost/ruff-action@v1
+        with:
+          src: "./src"
+          version: 0.0.259
   run-pytest:
-    needs: run-linter
+    needs: ruff-lint
     runs-on: ubuntu-20.04
     strategy:
       matrix:
-        python-version: [3.8.17, 3.9.17, 3.10.12]
+        python-version: [3.8.18, 3.9.18, 3.10.13, 3.11.6]
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python ${{ matrix.python-version }}
