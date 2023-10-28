@@ -41,10 +41,10 @@ $ mnoisy-rebuild -f data.json -i 26
 - Based on my understanding, an M-Sequence generates N = m*2-1 signal bits. To create an NxN image, multiple (N) sequences should be generated with different seeds then stacked to form the image.
 
 ## Considerations and Improvements
-Considerations
+### Considerations
 - The NoiseGrid generator uses the generic NoiseGenerator interface, so different subclasses may be easily implemented and injected. New generators should also be added to the factory registry.
 
-Improvements
+### Improvements
 - The metadata schema should be probably split into several sub schemas, corresponding to each component.
     - Using pydantic data models would simplify this validation and schema definition.
 - The m-sequence update function registry and also the NoiseGeneratorFactory are pretty rudimentary (just a dict). Could use a more sophisticated implementation to register them using decorators.
