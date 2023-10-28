@@ -17,8 +17,14 @@ dependencies = [
   "pyyaml",
 ]
 
+[tool.setuptools.packages.find]
+where = ["src"]
+[tool.setuptools.package-data]
+mnoisy = ["schema/*.yml"]
+
 [project.scripts]
-mnoisy-gen = "mnoisy:__main__.main"
+mnoisy-gen = "mnoisy:cli.main"
+mnoisy-rebuild = "mnoisy:cli.rebuild"
 
 [project.optional-dependencies]
 test = ["pytest", "pytest-cov"]

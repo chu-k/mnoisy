@@ -20,6 +20,9 @@ properties:
   image_size_in_pixels:
     type: integer
     description: Size of the square image in pixels
+  display_time_per_frame_in_seconds:
+    type: number
+    description: Time to display each frame in seconds
   frames:
     type: array
     description: List of frames in the animation (i.e. a NoiseGrid)

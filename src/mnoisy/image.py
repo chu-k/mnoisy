@@ -9,7 +9,8 @@ from matplotlib import animation
 from scipy.stats import randint
 
 from mnoisy.exceptions import NoiseGeneratorLimitError
-from mnoisy.noise import NoiseGenerator
+from mnoisy.noise.base import NoiseGenerator
+from mnoisy.noise.factory import GeneratorFactory
 from mnoisy.utils import validate_against_schema
 
 
@@ -45,12 +46,20 @@ class NoiseGridGenerator:
             "random_seed": int(seed),
         }
 
-    def reconstruct_image(self):
-        """Reconstruct image from metadata."""
-        pass
+    @staticmethod
+    def plot_single_grid(frame: np.ndarray, img_size: int):
+        fig, ax = plt.subplots(1, 1, figsize=(img_size, img_size))
+        im = ax.imshow(frame, cmap="gray", interpolation="nearest")
+        ax.get_xaxis().set_visible(False)  # this removes the ticks and numbers for x axis
+        ax.get_yaxis().set_visible(False)
+        ax.axis("off")
+        return fig, im
 
 
 class NoiseAnimator:
+    # global plotting settings
+    plt.rcParams["savefig.bbox"] = "tight"
+
     def __init__(
         self,
         image_artist: NoiseGridGenerator,
@@ -104,7 +113,6 @@ class NoiseAnimator:
             # generate frame and store its metadata
             frames[i], frame_data = self.image_artist.generate_image(sd)
             frame_data["frame_number"] = i
-            print(frame_data["timestamp_absolute"], metadata["created_at"])
             frame_data["timestamp_relative"] = str(
                 datetime.fromisoformat(frame_data["timestamp_absolute"])
                 - datetime.fromisoformat(metadata["created_at"])
@@ -116,13 +124,12 @@ class NoiseAnimator:
     def __animate_frames(self, frames: np.ndarray, output_filename: Path):
         """Animate a list of frames."""
         # Set the initial canvas and frame
-        fig = plt.figure()
-        im = plt.imshow(frames[0], cmap="gray", interpolation="nearest")
+        fig, ax = self.image_artist.plot_single_grid(frames[0], self.img_size)
 
         # define the animation update function
         def updatefig(i):
-            im.set_array(frames[i])
-            return (im,)
+            ax.set_array(frames[i])
+            return (ax,)
 
         # interval arg is in ms
         ani = animation.FuncAnimation(
@@ -133,6 +140,7 @@ class NoiseAnimator:
             blit=True,
         )
         ani.save(output_filename)
+        plt.show()
 
     def __get_metadata(self, output_filename: str, num_frames: int, seed: int) -> Dict:
         """Return metadata about the animation."""
@@ -146,6 +154,7 @@ class NoiseAnimator:
             "random_seed": seed,
             "num_frames": num_frames,
             "image_size_in_pixels": self.img_size,
+            "display_time_per_frame_in_seconds": self.display_time_per_frame_in_seconds,
             "frames": [],
             "noise_generator": self.image_artist.noise_generator.build_metadata(),
         }
@@ -156,3 +165,38 @@ class NoiseAnimator:
         print(metadata)
         with open(metadata["metadata_fname"], "w+") as fp:
             json.dump(metadata, fp)
+
+    @classmethod
+    def construct_instance_from_metadata(cls, metadata_path: str) -> Tuple["NoiseAnimator", int, int, str]:
+        """Parse metadata file.
+
+        Returns:
+            Animator instance, number of frames, random seed, output filename
+        """
+        with open(metadata_path, "r") as fp:
+            metadata: Dict[str, Any] = json.load(fp)
+        validate_against_schema(metadata, Path(__file__).parent.joinpath("schema/animation_data.yml").resolve())
+        generator_metadata = metadata["noise_generator"].copy()
+        generator = GeneratorFactory.get_generator(
+            generator_type=generator_metadata.pop("generator_type"), **generator_metadata
+        )
+        return (
+            cls(
+                NoiseGridGenerator(
+                    metadata["image_size_in_pixels"],
+                    generator,
+                ),
+                metadata["display_time_per_frame_in_seconds"],
+            ),
+            metadata["num_frames"],
+            metadata["random_seed"],
+            metadata["metadata_fname"],
+        )
+
+    def reconstruct_single_frame(self, frame_index: int, master_seed: int, output_slug: str):
+        """Reconstruct a single frame from the full sequence."""
+        # use the master seed to reproduce the seed for the frame at index frame_index
+        seed = randint(0, 2048).rvs(size=frame_index, random_state=master_seed)[-1]
+        frame, _ = self.image_artist.generate_image(seed)
+        fig, ax = self.image_artist.plot_single_grid(frame, self.img_size)
+        fig.savefig(f"{output_slug}-{frame_index}.png")
