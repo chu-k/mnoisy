@@ -3,6 +3,7 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
+from mnoisy.exceptions import RebuildIndexOutOfRangeError
 from mnoisy.image import NoiseAnimator, NoiseGridGenerator
 from mnoisy.noise.msequence import MSequence
 
@@ -22,7 +23,7 @@ def parse_args_main(args_list: list):
     return parser.parse_args(args_list)
 
 
-def main():
+def generate():
     args = parse_args_main(sys.argv[1:])
     animator = NoiseAnimator(
         NoiseGridGenerator(
@@ -49,9 +50,6 @@ def rebuild():
     if not args.index_of_frame:
         animator.execute(num_frames, seed, rebuild_slug)
         return
-
+    if args.index_of_frame > num_frames:
+        raise RebuildIndexOutOfRangeError(f"frame_index must be less than or equal to{num_frames}")
     animator.reconstruct_single_frame(args.index_of_frame, seed, rebuild_slug)
-
-
-if __name__ == "__main__":
-    main()

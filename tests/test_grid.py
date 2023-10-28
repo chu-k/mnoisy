@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 
 from mnoisy.image import NoiseGeneratorLimitError, NoiseGridGenerator
-from mnoisy.noise import MSequence
+from mnoisy.noise.msequence import MSequence
 
 
 @pytest.fixture

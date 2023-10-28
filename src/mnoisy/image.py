@@ -6,6 +6,7 @@ from typing import Any, Dict, Tuple
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib import animation
+from matplotlib.axes import Axes
 from scipy.stats import randint
 
 from mnoisy.exceptions import NoiseGeneratorLimitError
@@ -47,18 +48,19 @@ class NoiseGridGenerator:
         }
 
     @staticmethod
-    def plot_single_grid(frame: np.ndarray, img_size: int):
-        fig, ax = plt.subplots(1, 1, figsize=(img_size, img_size))
-        im = ax.imshow(frame, cmap="gray", interpolation="nearest")
-        ax.get_xaxis().set_visible(False)  # this removes the ticks and numbers for x axis
+    def plot_single_grid(ax: Axes, frame: np.ndarray):
+        im = ax.matshow(frame, cmap="gray", interpolation="none")
+        # apply styling to clean up the plot
+        ax.get_xaxis().set_visible(False)
         ax.get_yaxis().set_visible(False)
         ax.axis("off")
-        return fig, im
+        return ax, im
 
 
 class NoiseAnimator:
     # global plotting settings
     plt.rcParams["savefig.bbox"] = "tight"
+    plt.rcParams["toolbar"] = "None"
 
     def __init__(
         self,
@@ -108,7 +110,6 @@ class NoiseAnimator:
         """
         frames = np.zeros((num_frames, self.img_size, self.img_size))
         metadata = self.__get_metadata(output_filename, num_frames, seed)
-
         for i, sd in enumerate(randint(0, 2048).rvs(size=num_frames, random_state=seed)):
             # generate frame and store its metadata
             frames[i], frame_data = self.image_artist.generate_image(sd)
@@ -118,18 +119,18 @@ class NoiseAnimator:
                 - datetime.fromisoformat(metadata["created_at"])
             )
             metadata.setdefault("frames", []).append(frame_data)
-
         return frames, metadata
 
     def __animate_frames(self, frames: np.ndarray, output_filename: Path):
         """Animate a list of frames."""
         # Set the initial canvas and frame
-        fig, ax = self.image_artist.plot_single_grid(frames[0], self.img_size)
+        fig, ax = plt.subplots(1, 1, figsize=(self.img_size, self.img_size), squeeze=True)
+        ax, im = self.image_artist.plot_single_grid(ax, frames[0])
 
         # define the animation update function
         def updatefig(i):
-            ax.set_array(frames[i])
-            return (ax,)
+            im.set_data(frames[i])
+            return (im,)
 
         # interval arg is in ms
         ani = animation.FuncAnimation(
@@ -140,6 +141,7 @@ class NoiseAnimator:
             blit=True,
         )
         ani.save(output_filename)
+        # this blocks until the animation is manually closed
         plt.show()
 
     def __get_metadata(self, output_filename: str, num_frames: int, seed: int) -> Dict:
@@ -162,7 +164,6 @@ class NoiseAnimator:
     def __write_metadata(self, metadata: Dict):
         """Write metadata to file."""
         validate_against_schema(metadata, Path(__file__).parent.joinpath("schema/animation_data.yml").resolve())
-        print(metadata)
         with open(metadata["metadata_fname"], "w+") as fp:
             json.dump(metadata, fp)
 
@@ -198,5 +199,7 @@ class NoiseAnimator:
         # use the master seed to reproduce the seed for the frame at index frame_index
         seed = randint(0, 2048).rvs(size=frame_index, random_state=master_seed)[-1]
         frame, _ = self.image_artist.generate_image(seed)
-        fig, ax = self.image_artist.plot_single_grid(frame, self.img_size)
+        fig, ax = plt.subplots(1, 1, figsize=(self.img_size, self.img_size), squeeze=True)
+        ax, im = self.image_artist.plot_single_grid(ax, frame)
         fig.savefig(f"{output_slug}-{frame_index}.png")
+        plt.show()

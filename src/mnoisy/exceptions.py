@@ -4,3 +4,7 @@ class NoiseGeneratorLimitError(Exception):
 
 class NoiseGeneratorNotImplemented(Exception):
     """The requested NoiseGenerator type is not listed in the registry."""
+
+
+class RebuildIndexOutOfRangeError(Exception):
+    """The requested index is out of range for the given metadata."""

@@ -23,8 +23,8 @@ where = ["src"]
 mnoisy = ["schema/*.yml"]
 
 [project.scripts]
-mnoisy-gen = "mnoisy:cli.main"
-mnoisy-rebuild = "mnoisy:cli.rebuild"
+mnoisy-gen = "mnoisy:commands.generate"
+mnoisy-rebuild = "mnoisy:commands.rebuild"
 
 [project.optional-dependencies]
 test = ["pytest", "pytest-cov"]
