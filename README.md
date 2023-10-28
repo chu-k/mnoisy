@@ -1,6 +1,7 @@
 # Summary
-This package implements a CLI script for generating pseudorandom noise from M-sequences.
+This package implements a CLI script for generating pseudorandom noise from M-sequences. JSON metadata is generated for each run containing the image sizes and generator configurations to reproduce the run.
 
+![](docs/noise.gif)
 
 # Installation
 ```
